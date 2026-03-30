@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AI Smart Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="bg-[#0D1117] font-manrope text-slate-200 overflow-x-hidden">
+
+    <div id="toastContainer" class="fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none"></div>
+
+    <nav
+        class="fixed top-0 left-0 w-full h-16 bg-[#0D1117]/90 backdrop-blur-md border-b border-slate-800 px-4 md:px-6 flex items-center justify-between z-[999]">
+        <div class="flex items-center gap-3">
+            <button title="Menu" id="mobileMenuBtn" onclick="toggleMobileMenu()"
+                class="md:hidden text-slate-400 hover:text-white p-2 focus:outline-none transition">
+                <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+
+            <div
+                class="w-8 h-8 bg-gradient-to-tr from-[#6C63FF] to-[#00D4AA] rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(0,212,170,0.4)] hidden sm:flex">
+                <i class="fa-solid fa-layer-group text-white text-sm"></i>
+            </div>
+
+            <h2 class="text-lg md:text-xl font-syne font-black text-white tracking-widest uppercase">Nexus<span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-[#00D4AA] to-[#6C63FF]">.AI</span></h2>
+        </div>
+
+        <div class="flex items-center gap-3 md:gap-5">
+            <div class="relative hidden" id="adminNotificationContainer">
+                <button onclick="toggleNotifications()" title="Notifications"
+                    class="relative p-2 text-slate-400 hover:text-white transition rounded-full hover:bg-slate-800 focus:outline-none">
+                    <i class="fa-solid fa-bell text-xl mt-1"></i>
+                    <span id="notificationBadge"
+                        class="absolute top-1 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-[#0D1117] hidden shadow-[0_0_10px_rgba(239,68,68,0.8)]"></span>
+                </button>
+
+                <div id="notificationDropdown"
+                    class="fixed top-16 right-4 w-[280px] sm:absolute sm:top-full sm:right-0 sm:mt-4 sm:w-80 md:w-96 bg-slate-900 border border-slate-700 rounded-2xl shadow-[0_15px_50px_rgba(0,0,0,0.5)] hidden flex-col z-[1000] overflow-hidden origin-top-right transition-all">
+                    <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-[#151B23]">
+                        <h3 class="font-bold text-white flex items-center gap-2"><i
+                                class="fa-solid fa-bell text-[#00D4AA]"></i> Activity Log</h3>
+                        <button onclick="clearNotifications()"
+                            class="text-xs text-slate-400 hover:text-[#00D4AA] transition">Mark all read</button>
+                    </div>
+                    <div id="notificationList"
+                        class="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 divide-y divide-slate-800/50">
+                    </div>
+                </div>
+            </div>
+            <div class="hidden md:flex flex-col items-end">
+                <span class="text-sm font-bold text-white">Welcome, <span id="navUsername"
+                        class="text-white">User</span></span>
+                <span id="userRoleBadge"
+                    class="text-[10px] text-slate-500 font-mono tracking-widest uppercase bg-slate-800 px-2 py-0.5 rounded border border-slate-700 mt-1">LOADING...</span>
+            </div>
+            <div
+                class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 shadow-inner shrink-0">
+                <i class="fa-solid fa-user text-sm"></i>
+            </div>
+            <div class="h-6 w-px bg-slate-800 hidden sm:block"></div>
+            <button onclick="logout()"
+                class="text-slate-500 hover:text-red-500 transition-colors duration-300 p-2 shrink-0"
+                title="Secure Logout">
+                <i class="fa-solid fa-power-off text-lg"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="flex min-h-screen relative pt-16">
+        <div id="mobileSidebarOverlay" onclick="toggleMobileMenu()"
+            class="fixed inset-0 bg-black/80 z-[40] hidden opacity-0 md:hidden backdrop-blur-sm transition-opacity duration-300">
+        </div>
+
+        <aside id="sidebar"
+            class="fixed md:sticky top-16 left-0 z-[50] w-64 h-[calc(100dvh-4rem)] bg-[#0D1117] md:bg-[#0D1117]/95 md:backdrop-blur-xl border-r border-slate-800 flex flex-col p-5 overflow-y-auto transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-2xl md:shadow-none">
+            <nav class="space-y-2 mt-2 flex-grow w-full">
+                <button id="navDashboard" onclick="switchTab('dashboard')"
+                    class="flex w-full text-left items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-chart-pie text-lg w-6 text-center"></i>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <a href="#" id="navCatalog" onclick="switchTab('catalog')"
+                    class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-book-open text-lg w-6 text-center"></i> <span class="font-medium">Book
+                        Catalog</span>
+                </a>
+                <button id="navMyLoans" onclick="switchTab('myLoans')"
+                    class="flex w-full text-left items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-bookmark text-lg w-6 text-center"></i>
+                    <span class="font-medium">My Loans</span>
+                </button>
+                <a href="#" id="navManageBooks" onclick="switchTab('manageBooks')"
+                    class="hidden items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-clipboard-list text-lg w-6 text-center"></i> <span class="font-medium">Manage
+                        Books</span>
+                </a>
+                <a href="#" id="navUsers" onclick="switchTab('users')"
+                    class="hidden items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-users text-lg w-6 text-center"></i> <span class="font-medium">Users</span>
+                </a>
+                <a href="#" id="navIssueReturn" onclick="switchTab('issue')"
+                    class="hidden items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-right-left text-lg w-6 text-center"></i> <span class="font-medium">Issue /
+                        Return</span>
+                </a>
+                <a href="#" id="navAiInsights" onclick="switchTab('aiInsights')"
+                    class="flex items-center space-x-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-800/50 rounded-xl transition">
+                    <i class="fa-solid fa-wand-magic-sparkles text-lg w-6 text-center"></i> <span class="font-medium">AI
+                        Insights</span>
+                </a>
+            </nav>
+            <div class="border-t border-slate-800 pt-5 mt-auto">
+                <p class="text-[10px] text-slate-600 font-mono uppercase tracking-widest text-center">System v2.0 Live
+                </p>
+            </div>
+        </aside>
+
+        <main class="flex-grow w-full h-[calc(100vh-4rem)] relative bg-[#0D1117] overflow-hidden">
+
+            <section id="dashboardSection" class="hidden h-full flex-col w-full transition-all duration-300">
+                <div class="h-full flex flex-col w-full">
+                    <header
+                        class="shrink-0 bg-[#0D1117] z-20 px-4 md:px-10 py-6 border-b border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between w-full gap-4">
+                        <div>
+                            <h1 class="text-2xl sm:text-3xl font-syne font-extrabold text-white tracking-tight">System
+                                Overview</h1>
+                            <p class="text-slate-400 mt-1 text-sm">Real-time LMS metrics and recent activity.</p>
+                        </div>
+                        <span
+                            class="text-xs sm:text-sm font-mono text-slate-600 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg w-full sm:w-auto text-center">Last
+                            updated: <span id="dashUpdateTime" class="text-slate-400">LOADING</span></span>
+                    </header>
+
+                    <div id="dashboardScrollContent"
+                        class="flex-grow overflow-y-auto p-4 md:p-6 lg:p-10 space-y-8 scrollbar-thin scrollbar-thumb-slate-700 w-full">
+                        <section class="grid grid-cols-2 xl:grid-cols-4 gap-6">
+                            <div
+                                class="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-[#00D4AA]/50 transition">
+                                <div
+                                    class="absolute -right-4 -top-4 w-24 h-24 bg-[#00D4AA]/10 rounded-full blur-2xl group-hover:bg-[#00D4AA]/20 transition">
+                                </div>
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-[#00D4AA]/20 flex items-center justify-center mb-4 border border-[#00D4AA]/30 shadow-lg shrink-0">
+                                    <i class="fa-solid fa-books text-2xl text-[#00D4AA]"></i>
+                                </div>
+                                <div class="flex flex-col flex-grow">
+                                    <h3 class="text-sm font-medium text-slate-400">Total Books</h3>
+                                    <p id="kpiTotalInventory" class="text-5xl font-extrabold text-white mt-1.5"><i
+                                            class="fa-solid fa-circle-notch fa-spin text-lg text-slate-600"></i></p>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-blue-500/50 transition">
+                                <div
+                                    class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition">
+                                </div>
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4 border border-blue-500/30 shadow-lg shrink-0">
+                                    <i class="fa-solid fa-hand-holding-box text-2xl text-blue-400"></i>
+                                </div>
+                                <div class="flex flex-col flex-grow">
+                                    <h3 class="text-sm font-medium text-slate-400">Currently Borrowed</h3>
+                                    <p id="kpiActiveLoans" class="text-5xl font-extrabold text-white mt-1.5"><i
+                                            class="fa-solid fa-circle-notch fa-spin text-lg text-slate-600"></i></p>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-red-500/50 transition">
+                                <div
+                                    class="absolute -right-4 -top-4 w-24 h-24 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition">
+                                </div>
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center mb-4 border border-red-500/30 shadow-lg shrink-0">
+                                    <i class="fa-solid fa-calendar-exclamation text-2xl text-red-400"></i>
+                                </div>
+                                <div class="flex flex-col flex-grow">
+                                    <h3 class="text-sm font-medium text-slate-400">High Priority Overdue</h3>
+                                    <p id="kpiOverdue" class="text-5xl font-extrabold text-white mt-1.5"><i
+                                            class="fa-solid fa-circle-notch fa-spin text-lg text-slate-600"></i></p>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white/5 backdrop-blur-xl p-6 rounded-2xl border border-slate-700/50 shadow-xl relative overflow-hidden group hover:border-purple-500/50 transition">
+                                <div
+                                    class="absolute -right-4 -top-4 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition">
+                                </div>
+                                <div
+                                    class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4 border border-purple-500/30 shadow-lg shrink-0">
+                                    <i class="fa-solid fa-user-plus text-2xl text-purple-400"></i>
+                                </div>
+                                <div class="flex flex-col flex-grow">
+                                    <h3 class="text-sm font-medium text-slate-400">New Members (30 Days)</h3>
+                                    <p id="kpiNewUsers" class="text-5xl font-extrabold text-white mt-1.5"><i
+                                            class="fa-solid fa-circle-notch fa-spin text-lg text-slate-600"></i></p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div
+                                class="lg:col-span-2 bg-[#151B23] border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl relative overflow-hidden">
+                                <div
+                                    class="absolute top-0 right-0 w-[400px] h-[400px] bg-[#6C63FF]/5 rounded-full blur-[100px] -z-10 pointer-events-none">
+                                </div>
+                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
+                                    <i class="fa-solid fa-chart-line-up text-[#6C63FF]"></i> Inventory vs. Usage Trend
+                                </h3>
+                                <div class="h-64 relative w-full flex items-center justify-center">
+                                    <canvas id="inventoryChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-[#151B23] border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-xl flex flex-col justify-center centering-dropdown">
+                                <h3 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
+                                    <i class="fa-solid fa-tag text-[#00D4AA]"></i> Top Category
+                                </h3>
+                                <div
+                                    class="text-center p-6 bg-slate-900 border border-slate-800 rounded-xl shadow-inner">
+                                    <i class="fa-solid fa-code text-5xl text-[#00D4AA] mb-4"></i>
+                                    <p id="topCategoryName" class="text-2xl font-bold text-white leading-tight">Computer
+                                        Science</p>
+                                    <p class="text-sm text-slate-400 mt-1">Holds <span id="topCategoryCount"
+                                            class="text-white font-mono">0</span> unique titles</p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-10">
+                            <div
+                                class="bg-[#151B23] border border-slate-700/50 rounded-3xl p-6 sm:p-8 shadow-xl centering-dropdown">
+                                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-xl font-bold text-white tracking-wide flex items-center gap-3"><i
+                                            class="fa-solid fa-plus-large text-[#00D4AA]"></i> Recently Added Titles
+                                    </h3>
+                                    <a href="#" onclick="switchTab('catalog')"
+                                        class="text-sm font-bold text-[#00D4AA] hover:underline">View All</a>
+                                </div>
+                                <div class="space-y-4" id="recentBooksList">
+                                    <p class="text-center text-slate-500 italic py-4">Loading titles...</p>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-[#151B23] border border-slate-700/50 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col centering-dropdown">
+                                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
+                                    <h3 class="text-xl font-bold text-white tracking-wide flex items-center gap-3"><i
+                                            class="fa-solid fa-users text-[#6C63FF]"></i> Active Borrowers</h3>
+                                    <a href="#" onclick="switchTab('users')"
+                                        class="text-sm font-bold text-[#6C63FF] hover:underline">Manage Users</a>
+                                </div>
+                                <div
+                                    class="overflow-x-auto w-full pb-2 scrollbar-thin scrollbar-thumb-slate-700 centering-dropdown">
+                                    <table
+                                        class="w-full text-left border-collapse text-sm whitespace-nowrap min-w-[450px]">
+                                        <thead>
+                                            <tr
+                                                class="text-[10px] sm:text-xs text-slate-500 uppercase font-bold tracking-wider border-b border-slate-800">
+                                                <th class="py-3 pr-4">User</th>
+                                                <th class="py-3 px-4 text-center">Open Loans</th>
+                                                <th class="py-3 pl-4 text-right">Last Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="topBorrowersTableBody"
+                                            class="divide-y divide-slate-800/50 centering-dropdown">
+                                            <tr>
+                                                <td colspan="3" class="text-center text-slate-500 italic py-6">Loading
+                                                    borrowers...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </section>
+
+            <section id="studentDashboardSection"
+                class="hidden h-full flex-col w-full p-4 md:p-6 lg:p-10 pb-32 overflow-y-auto custom-scrollbar">
+                <div
+                    class="shrink-0 bg-gradient-to-r from-purple-600/20 to-[#00D4AA]/20 border border-[#00D4AA]/30 rounded-3xl p-6 sm:p-8 md:p-10 mb-8 relative overflow-hidden shadow-[0_0_30px_rgba(0,212,170,0.05)] centering-dropdown">
+                    <div class="relative z-10 centering-dropdown">
+                        <h2 class="text-3xl md:text-5xl font-extrabold text-white mb-4" id="studentWelcomeText">Welcome
+                            back, Reader!</h2>
+                        <p class="text-slate-300 md:text-lg mb-8 max-w-xl leading-relaxed">
+                            Ready for your next great adventure? You currently have <span id="studentActiveCountText"
+                                class="text-[#00D4AA] font-bold">0 active loans</span>.
+                        </p>
+                        <button onclick="switchTab('catalog')"
+                            class="bg-[#00D4AA] hover:bg-[#00D4AA]/80 text-[#0D1117] px-8 py-3.5 rounded-xl font-extrabold transition shadow-[0_0_15px_rgba(0,212,170,0.2)] flex items-center gap-2 transform hover:-translate-y-0.5 w-full sm:w-fit justify-center">
+                            <i class="fa-solid fa-compass"></i> Explore Catalog
+                        </button>
+                    </div>
+                    <i
+                        class="fa-solid fa-book-reader absolute -right-10 -bottom-10 text-[8rem] sm:text-[12rem] text-white/5 z-0 transform -rotate-12 centering-dropdown"></i>
+                </div>
+
+                <div class="shrink-0 grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner centering-dropdown">
+                        <div
+                            class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-white mb-1" id="studentStatActive">0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Borrowed Now</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner centering-dropdown">
+                        <div
+                            class="w-12 h-12 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-white mb-1" id="studentStatOverdue">0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Overdue</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner centering-dropdown">
+                        <div
+                            class="w-12 h-12 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-check-double"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-white mb-1" id="studentStatReturned">0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Total Read</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner centering-dropdown">
+                        <div
+                            class="w-12 h-12 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                        <h3 class="text-3xl font-bold text-white mb-1" id="studentStatFines">₹0</h3>
+                        <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">Unpaid Fines</p>
+                    </div>
+                </div>
+
+                <div class="shrink-0 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div onclick="switchTab('myLoans')"
+                        class="bg-[#0D1117] border border-slate-800 hover:border-[#00D4AA]/50 p-6 rounded-2xl flex items-center gap-5 cursor-pointer transition group centering-dropdown">
+                        <div
+                            class="w-16 h-16 shrink-0 rounded-2xl bg-slate-800 flex items-center justify-center group-hover:bg-[#00D4AA]/10 transition centering-dropdown">
+                            <i
+                                class="fa-solid fa-bookmark text-2xl text-slate-400 group-hover:text-[#00D4AA] transition"></i>
+                        </div>
+                        <div class="centering-dropdown">
+                            <h4 class="text-lg font-bold text-white mb-1 group-hover:text-[#00D4AA] transition">Manage
+                                My Loans</h4>
+                            <p class="text-sm text-slate-400">View due dates, pay fines, or renew your current books.
+                            </p>
+                        </div>
+                    </div>
+                    <div onclick="switchTab('aiInsights')"
+                        class="bg-[#0D1117] border border-slate-800 hover:border-purple-500/50 p-6 rounded-2xl flex items-center gap-5 cursor-pointer transition group centering-dropdown">
+                        <div
+                            class="w-16 h-16 shrink-0 rounded-2xl bg-slate-800 flex items-center justify-center group-hover:bg-purple-500/10 transition centering-dropdown">
+                            <i
+                                class="fa-solid fa-wand-magic-sparkles text-2xl text-slate-400 group-hover:text-purple-400 transition"></i>
+                        </div>
+                        <div class="centering-dropdown">
+                            <h4 class="text-lg font-bold text-white mb-1 group-hover:text-purple-400 transition">Get AI
+                                Recommendations</h4>
+                            <p class="text-sm text-slate-400">Not sure what to read? Let the AI analyze your habits.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="catalogSection" class="hidden h-full flex-col w-full transition-all duration-300">
+                <div class="h-full flex flex-col w-full">
+                    <header
+                        class="shrink-0 bg-[#0D1117] z-20 px-4 md:px-10 py-6 border-b border-slate-800 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="shrink-0 centering-dropdown">
+                            <h1 class="text-3xl font-syne font-extrabold text-white tracking-tight">Book Catalog</h1>
+                            <p class="text-slate-400 mt-1 text-sm">Browse our collection</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:max-w-xl centering-dropdown">
+                            <div class="relative w-full centering-dropdown">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 centering-dropdown">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <input type="text" id="catalogBookSearch" onkeyup="filterCatalogGrid()"
+                                    placeholder="Search books, authors..."
+                                    class="w-full bg-[#151B23] border border-slate-700/50 text-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-[#00D4AA] transition text-sm shadow-inner centering-dropdown">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 w-full sm:w-auto shrink-0 centering-dropdown">
+                                <button id="viewGridBtn" onclick="switchCatalogViewMode('grid')" title="grid"
+                                    class="flex-1 sm:flex-none py-2.5 px-4 bg-[#00D4AA]/20 text-[#00D4AA] rounded-xl border border-[#00D4AA]/40 transition hover:bg-[#00D4AA]/30 centering-dropdown"><i
+                                        class="fa-solid fa-grid-2"></i></button>
+                                <button id="viewListBtn" onclick="switchCatalogViewMode('list')" title="list"
+                                    class="flex-1 sm:flex-none py-2.5 px-4 bg-[#151B23] text-slate-400 border border-slate-700/50 rounded-xl hover:text-white hover:border-slate-500 transition centering-dropdown"><i
+                                        class="fa-solid fa-list-ul"></i></button>
+                                <div
+                                    class="hidden sm:block py-2.5 px-4 bg-[#151B23] rounded-xl border border-slate-700/50 centering-dropdown">
+                                </div>
+                                <div
+                                    class="hidden sm:block py-2.5 px-4 bg-[#151B23] rounded-xl border border-slate-700/50 centering-dropdown">
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="flex-grow overflow-y-auto p-4 md:p-10 scrollbar-thin scrollbar-thumb-slate-700 w-full">
+                        <div class="text-slate-400 text-sm mb-6 pb-4 border-b border-slate-800"><span
+                                id="catalogBookCount">0</span> books found</div>
+
+                        <div class="flex flex-col lg:flex-row gap-8 items-start w-full">
+                            <div
+                                class="w-full lg:w-64 shrink-0 bg-[#151B23] border border-slate-700/50 rounded-2xl p-5 lg:sticky top-4 shadow-xl centering-dropdown">
+                                <h3 class="text-white font-bold flex items-center gap-2 mb-6"><i
+                                        class="fa-solid fa-sliders text-[#00D4AA]"></i> Filters</h3>
+                                <div class="mb-8 centering-dropdown">
+                                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Category
+                                    </h4>
+                                    <ul class="flex flex-wrap lg:flex-col gap-2 text-sm text-slate-300"
+                                        id="filterCategories">
+                                        <li><button onclick="setCategoryFilter('all', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left bg-[#00D4AA]/10 text-[#00D4AA] rounded-full lg:rounded-lg border border-[#00D4AA]/30 lg:border-none transition font-medium">All</button>
+                                        </li>
+                                        <li><button onclick="setCategoryFilter('Computer Science', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left hover:bg-white/5 rounded-full lg:rounded-lg border border-slate-700 lg:border-none transition">Computer
+                                                Science</button></li>
+                                        <li><button onclick="setCategoryFilter('DevOps & Cloud', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left hover:bg-white/5 rounded-full lg:rounded-lg border border-slate-700 lg:border-none transition">DevOps
+                                                & Cloud</button></li>
+                                        <li><button onclick="setCategoryFilter('Operations Research', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left hover:bg-white/5 rounded-full lg:rounded-lg border border-slate-700 lg:border-none transition">Operations
+                                                Research</button></li>
+                                        <li><button onclick="setCategoryFilter('Data Science', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left hover:bg-white/5 rounded-full lg:rounded-lg border border-slate-700 lg:border-none transition">Data
+                                                Science</button></li>
+                                        <li><button onclick="setCategoryFilter('Fiction & Manga', this)"
+                                                class="category-btn px-4 py-2 lg:w-full lg:text-left hover:bg-white/5 rounded-full lg:rounded-lg border border-slate-700 lg:border-none transition">Fiction
+                                                & Manga</button></li>
+                                    </ul>
+                                </div>
+                                <div class="mt-6 centering-dropdown">
+                                    <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+                                        Availability</h4>
+                                    <label class="flex items-center gap-3 cursor-pointer group">
+                                        <div class="relative centering-dropdown">
+                                            <input type="checkbox" class="sr-only">
+                                            <div
+                                                class="block bg-slate-800 w-10 h-6 rounded-full group-hover:bg-slate-700 transition centering-dropdown">
+                                            </div>
+                                            <div
+                                                class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition centering-dropdown">
+                                            </div>
+                                        </div>
+                                        <span class="text-sm text-slate-300">Available only</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow w-full min-w-0 centering-dropdown">
+                                <div id="bookCatalogGrid"
+                                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 w-full centering-dropdown">
+                                </div>
+                                <div id="bookCatalogList" class="flex-col gap-4 hidden w-full centering-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="manageBooksSection" class="hidden h-full flex-col w-full transition-all duration-300">
+                <div class="h-full flex flex-col w-full centering-dropdown">
+                    <header
+                        class="shrink-0 bg-[#0D1117] z-20 px-4 md:px-10 py-6 border-b border-slate-800 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div class="centering-dropdown">
+                            <h1 class="text-3xl font-syne font-extrabold text-white tracking-tight">Manage Books</h1>
+                            <p class="text-slate-400 mt-2 text-sm">CRUD operations on the collection</p>
+                        </div>
+                        <div class="flex items-center gap-4 w-full md:w-auto centering-dropdown">
+                            <div class="relative w-full md:w-80 centering-dropdown">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 centering-dropdown">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </div>
+                                <input type="text" id="adminBookSearch" onkeyup="filterAdminTable()"
+                                    placeholder="Search titles or ISBN..."
+                                    class="w-full bg-[#151B23] border border-slate-700 text-white rounded-full pl-11 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner text-sm centering-dropdown">
+                            </div>
+                            <button onclick="openAddBookModal()"
+                                class="flex-shrink-0 flex items-center justify-center bg-[#00D4AA] hover:bg-[#00D4AA]/80 text-[#0D1117] px-5 py-2.5 rounded-full font-bold transition shadow-[0_0_15px_rgba(0,212,170,0.3)] centering-dropdown"><i
+                                    class="fa-solid fa-plus"></i> <span class="hidden sm:inline ml-2">Add
+                                    Book</span></button>
+                        </div>
+                    </header>
+                    <div
+                        class="flex-grow overflow-y-auto p-4 md:p-10 scrollbar-thin scrollbar-thumb-slate-700 w-full centering-dropdown">
+                        <div
+                            class="bg-[#151B23] border border-slate-700/50 rounded-2xl shadow-xl overflow-hidden w-full centering-dropdown">
+                            <div class="overflow-x-auto w-full pb-4 scrollbar-thin scrollbar-thumb-slate-700">
+                                <table
+                                    class="w-full text-left border-collapse whitespace-nowrap min-w-[800px] centering-dropdown">
+                                    <thead
+                                        class="bg-white/5 border-b border-slate-700/50 text-xs font-bold text-slate-400 uppercase tracking-widest centering-dropdown">
+                                        <tr>
+                                            <th class="px-6 py-4">Book</th>
+                                            <th class="px-6 py-4">ISBN</th>
+                                            <th class="px-6 py-4">Category</th>
+                                            <th class="px-6 py-4 text-center">Stock</th>
+                                            <th class="px-6 py-4 text-center">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="manageBooksTableBody"
+                                        class="divide-y divide-slate-800/50 centering-dropdown"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="usersSection"
+                class="hidden h-full flex-col w-full p-4 md:p-10 overflow-y-auto custom-scrollbar">
+                <div class="mb-8 centering-dropdown">
+                    <h2 class="text-3xl font-extrabold text-white">User Management</h2>
+                    <p class="text-slate-400 mt-1">Student and teacher accounts access</p>
+                </div>
+
+                <div
+                    class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-6 w-full centering-dropdown">
+                    <div class="relative w-full xl:w-1/2 centering-dropdown">
+                        <i
+                            class="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 centering-dropdown"></i>
+                        <input type="text" id="userSearch" onkeyup="applyUserFilters()"
+                            placeholder="Search by name, email, or ID..."
+                            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner centering-dropdown">
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 w-full xl:w-auto centering-dropdown">
+                        <div
+                            class="flex flex-wrap bg-slate-900 rounded-xl p-1 border border-slate-700 shadow-inner gap-1 centering-dropdown">
+                            <button onclick="setStatusFilter('All', this)"
+                                class="px-4 py-2 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-sm font-bold border border-[#00D4AA]/30 centering-dropdown">All</button>
+                            <button onclick="setStatusFilter('Active', this)"
+                                class="px-4 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition centering-dropdown">Active</button>
+                            <button onclick="setStatusFilter('Suspended', this)"
+                                class="px-4 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition centering-dropdown">Suspended</button>
+                        </div>
+                        <div
+                            class="flex flex-wrap bg-slate-900 rounded-xl p-1 border border-slate-700 shadow-inner gap-1 centering-dropdown">
+                            <button onclick="setRoleFilter('All', this)"
+                                class="px-4 py-2 rounded-lg bg-[#00D4AA]/20 text-[#00D4AA] text-sm font-bold border border-[#00D4AA]/30 centering-dropdown">All</button>
+                            <button onclick="setRoleFilter('Student', this)"
+                                class="px-4 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition centering-dropdown">Student</button>
+                            <button onclick="setRoleFilter('Teacher', this)"
+                                class="px-4 py-2 rounded-lg text-slate-400 hover:text-white text-sm font-medium transition centering-dropdown">Teacher</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-[#00D4AA]/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 centering-dropdown">
+                        </div>
+                        <h3 id="statTotalUsers"
+                            class="text-3xl font-extrabold text-[#00D4AA] mb-1 relative z-10 centering-dropdown">--</h3>
+                        <p class="text-slate-400 text-sm font-medium relative z-10 centering-dropdown">Total Users</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-blue-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 centering-dropdown">
+                        </div>
+                        <h3 id="statStudents"
+                            class="text-3xl font-extrabold text-blue-400 mb-1 relative z-10 centering-dropdown">--</h3>
+                        <p class="text-slate-400 text-sm font-medium relative z-10 centering-dropdown">Students</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-orange-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 centering-dropdown">
+                        </div>
+                        <h3 id="statTeachers"
+                            class="text-3xl font-extrabold text-orange-400 mb-1 relative z-10 centering-dropdown">--
+                        </h3>
+                        <p class="text-slate-400 text-sm font-medium relative z-10 centering-dropdown">Teachers</p>
+                    </div>
+                    <div
+                        class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 right-0 w-16 h-16 bg-red-500/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-150 centering-dropdown">
+                        </div>
+                        <h3 id="statSuspended"
+                            class="text-3xl font-extrabold text-red-500 mb-1 relative z-10 centering-dropdown">--</h3>
+                        <p class="text-slate-400 text-sm font-medium relative z-10 centering-dropdown">Suspended</p>
+                    </div>
+                </div>
+
+                <div
+                    class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-inner flex-grow flex flex-col w-full centering-dropdown">
+                    <div class="overflow-x-auto w-full pb-4 scrollbar-thin scrollbar-thumb-slate-700">
+                        <table
+                            class="w-full text-left border-collapse whitespace-nowrap min-w-[800px] centering-dropdown">
+                            <thead
+                                class="bg-[#0D1117]/50 border-b border-slate-800 text-xs text-slate-500 uppercase tracking-wider centering-dropdown">
+                                <tr>
+                                    <th class="p-5 font-bold">User</th>
+                                    <th class="p-5 font-bold">System ID</th>
+                                    <th class="p-5 font-bold">Role</th>
+                                    <th class="p-5 font-bold">Department</th>
+                                    <th class="p-5 font-bold text-center">Active Loans</th>
+                                    <th class="p-5 font-bold text-center">Status</th>
+                                    <th class="p-5 font-bold text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody" class="divide-y divide-slate-800/50 centering-dropdown">
+                                <tr>
+                                    <td colspan="7" class="text-center text-slate-500 italic py-6">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="issueSection"
+                class="hidden h-full flex-col w-full p-4 md:p-10 overflow-y-auto custom-scrollbar">
+                <div class="mb-8 centering-dropdown">
+                    <h2 class="text-3xl font-extrabold text-white">Operations Desk</h2>
+                    <p class="text-slate-400 mt-1">Fast-action scanning for checkouts and returns</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full">
+                    <div
+                        class="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00D4AA] to-blue-500 centering-dropdown">
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-6 flex items-center centering-dropdown">
+                            <div
+                                class="w-10 h-10 rounded-full bg-[#00D4AA]/20 text-[#00D4AA] flex items-center justify-center mr-3 border border-[#00D4AA]/30 centering-dropdown">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            </div>
+                            Issue Book
+                        </h3>
+                        <div class="space-y-5 centering-dropdown">
+                            <div class="centering-dropdown">
+                                <label
+                                    class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Student
+                                    / Teacher Username</label>
+                                <div class="relative centering-dropdown">
+                                    <i
+                                        class="fa-solid fa-user absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 centering-dropdown"></i>
+                                    <input type="text" id="issueUsername" placeholder="e.g. pujan, sarah.j"
+                                        class="w-full bg-[#0D1117] border border-slate-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition text-lg font-mono placeholder:text-slate-600 centering-dropdown">
+                                </div>
+                            </div>
+                            <div class="centering-dropdown">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ISBN
+                                    Number</label>
+                                <div class="relative centering-dropdown">
+                                    <i
+                                        class="fa-solid fa-barcode absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 centering-dropdown"></i>
+                                    <input type="text" id="issueIsbn" placeholder="e.g. 978-3-16-148410-0"
+                                        class="w-full bg-[#0D1117] border border-slate-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition text-lg font-mono placeholder:text-slate-600 centering-dropdown">
+                                </div>
+                            </div>
+                            <button onclick="processDeskIssue()" id="btnProcessIssue"
+                                class="w-full bg-[#00D4AA] hover:bg-[#00D4AA]/80 text-[#0D1117] py-4 rounded-xl font-extrabold transition shadow-[0_0_20px_rgba(0,212,170,0.2)] hover:shadow-[0_0_30px_rgba(0,212,170,0.4)] transform hover:-translate-y-0.5 mt-4 text-lg centering-dropdown">
+                                Confirm Issue
+                            </button>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-inner relative overflow-hidden group centering-dropdown">
+                        <div
+                            class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 centering-dropdown">
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-6 flex items-center centering-dropdown">
+                            <div
+                                class="w-10 h-10 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center mr-3 border border-purple-500/30 centering-dropdown">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            </div>
+                            Return Book
+                        </h3>
+                        <div class="space-y-5 centering-dropdown">
+                            <p class="text-sm text-slate-400 mb-4 centering-dropdown">Scan or enter the ISBN. The system
+                                will automatically find the active loan and clear it.</p>
+                            <div class="centering-dropdown">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">ISBN
+                                    Number</label>
+                                <div class="relative centering-dropdown">
+                                    <i
+                                        class="fa-solid fa-barcode absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500 centering-dropdown"></i>
+                                    <input type="text" id="returnIsbn" placeholder="e.g. 978-3-16-148410-0"
+                                        class="w-full bg-[#0D1117] border border-slate-700 text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition text-lg font-mono placeholder:text-slate-600 centering-dropdown">
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-slate-800/80 mt-6 centering-dropdown">
+                                <button onclick="processDeskReturn()" id="btnProcessReturn"
+                                    class="w-full bg-purple-500 hover:bg-purple-400 text-white py-4 rounded-xl font-extrabold transition shadow-[0_0_20px_rgba(168,85,247,0.2)] hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transform hover:-translate-y-0.5 mt-2 text-lg centering-dropdown">
+                                    Process Return
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="myLoansSection"
+                class="hidden h-full flex-col w-full p-4 md:p-10 pb-32 overflow-y-auto custom-scrollbar">
+                <div class="shrink-0 mb-8 border-b border-slate-800 pb-6 centering-dropdown">
+                    <h2 class="text-3xl font-extrabold text-white">My Loans</h2>
+                    <p class="text-slate-400 mt-1">Track and manage your borrowed books</p>
+                </div>
+
+                <div class="shrink-0 flex flex-wrap gap-4 mb-8 w-full centering-dropdown">
+                    <button onclick="setLoanFilter('All', this)"
+                        class="flex items-center gap-2 bg-slate-800 border border-slate-600 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition centering-dropdown">
+                        All <span id="countAllLoans"
+                            class="bg-slate-700 px-2 py-0.5 rounded-full text-xs centering-dropdown">0</span>
+                    </button>
+                    <button onclick="setLoanFilter('ACTIVE', this)"
+                        class="flex items-center gap-2 bg-[#0D1117] border border-slate-800 hover:border-slate-600 px-5 py-2.5 rounded-xl text-slate-400 hover:text-white text-sm font-bold transition centering-dropdown">
+                        Active <span id="countActiveLoans"
+                            class="bg-[#00D4AA]/20 text-[#00D4AA] px-2 py-0.5 rounded-full text-xs centering-dropdown">0</span>
+                    </button>
+                    <button onclick="setLoanFilter('OVERDUE', this)"
+                        class="flex items-center gap-2 bg-[#0D1117] border border-slate-800 hover:border-slate-600 px-5 py-2.5 rounded-xl text-slate-400 hover:text-white text-sm font-bold transition centering-dropdown">
+                        Overdue <span id="countOverdueLoans"
+                            class="bg-red-500/20 text-red-500 px-2 py-0.5 rounded-full text-xs centering-dropdown">0</span>
+                    </button>
+                    <button onclick="setLoanFilter('RETURNED', this)"
+                        class="flex items-center gap-2 bg-[#0D1117] border border-slate-800 hover:border-slate-600 px-5 py-2.5 rounded-xl text-slate-400 hover:text-white text-sm font-bold transition centering-dropdown">
+                        Returned <span id="countReturnedLoans"
+                            class="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full text-xs centering-dropdown">0</span>
+                    </button>
+                </div>
+
+                <div id="myLoansContainer" class="shrink-0 space-y-6 max-w-5xl pb-32 w-full centering-dropdown">
+                </div>
+            </section>
+
+            <section id="aiInsightsSection" class="hidden h-full flex-col w-full overflow-hidden relative">
+                <div
+                    class="shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-slate-800 p-4 md:p-6 lg:px-10 lg:pt-10 lg:pb-6 bg-[#0D1117] z-20 shadow-sm w-full gap-4 centering-dropdown">
+                    <div class="centering-dropdown">
+                        <h2
+                            class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#00D4AA] to-purple-500 flex items-center gap-3 centering-dropdown">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[#00D4AA]"></i> System AI Insights
+                        </h2>
+                        <p class="text-slate-400 mt-2">Real-time predictive analytics and library health monitoring.</p>
+                    </div>
+                    <button onclick="runAiAnalysis()" id="btnRunAi"
+                        class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-xl font-bold transition border border-slate-600 shadow-[0_0_15px_rgba(0,0,0,0.5)] flex items-center gap-2 group w-full sm:w-auto justify-center centering-dropdown">
+                        <i
+                            class="fa-solid fa-microchip text-[#00D4AA] group-hover:animate-pulse centering-dropdown"></i>
+                        Re-Run Analysis
+                    </button>
+                </div>
+
+                <div
+                    class="flex-grow overflow-y-auto p-4 md:p-10 pt-6 pb-32 custom-scrollbar w-full centering-dropdown">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div
+                            class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-inner relative overflow-hidden flex flex-col centering-dropdown">
+                            <div
+                                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#00D4AA] to-blue-500 centering-dropdown">
+                            </div>
+                            <h3
+                                class="text-lg font-bold text-white mb-4 flex items-center gap-2 shrink-0 centering-dropdown">
+                                <i class="fa-solid fa-layer-group text-[#00D4AA]"></i> Predictive Inventory
+                            </h3>
+                            <div id="aiInventoryOutput" class="space-y-4 flex-grow centering-dropdown">
+                                <div class="animate-pulse flex space-x-4 centering-dropdown">
+                                    <div class="flex-1 space-y-4 py-1 centering-dropdown">
+                                        <div class="h-2 bg-slate-700 rounded w-3/4 centering-dropdown"></div>
+                                        <div class="h-2 bg-slate-700 rounded centering-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-inner relative overflow-hidden flex flex-col centering-dropdown">
+                            <div
+                                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 centering-dropdown">
+                            </div>
+                            <h3
+                                class="text-lg font-bold text-white mb-4 flex items-center gap-2 shrink-0 centering-dropdown">
+                                <i class="fa-solid fa-users-viewfinder text-purple-400"></i> Reader Behavior
+                            </h3>
+                            <div id="aiBehaviorOutput" class="space-y-4 flex-grow centering-dropdown">
+                                <div class="animate-pulse flex space-x-4 centering-dropdown">
+                                    <div class="flex-1 space-y-4 py-1 centering-dropdown">
+                                        <div class="h-2 bg-slate-700 rounded w-3/4 centering-dropdown"></div>
+                                        <div class="h-2 bg-slate-700 rounded centering-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div
+                            class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-inner relative overflow-hidden flex flex-col centering-dropdown">
+                            <div
+                                class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 to-orange-500 centering-dropdown">
+                            </div>
+                            <h3
+                                class="text-lg font-bold text-white mb-4 flex items-center gap-2 shrink-0 centering-dropdown">
+                                <i class="fa-solid fa-shield-halved text-red-500"></i> Security & Anomalies
+                            </h3>
+                            <div id="aiAnomalyOutput" class="space-y-4 flex-grow centering-dropdown">
+                                <div class="animate-pulse flex space-x-4 centering-dropdown">
+                                    <div class="flex-1 space-y-4 py-1 centering-dropdown">
+                                        <div class="h-2 bg-slate-700 rounded w-3/4 centering-dropdown"></div>
+                                        <div class="h-2 bg-slate-700 rounded centering-dropdown"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div
+                        class="bg-gradient-to-r from-[#0D1117] to-slate-900 border border-[#00D4AA]/30 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_30px_rgba(0,212,170,0.1)] shrink-0 centering-dropdown">
+                        <i
+                            class="fa-brands fa-hubspot absolute -right-10 -bottom-10 text-9xl text-[#00D4AA]/5 centering-dropdown"></i>
+                        <h3
+                            class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-2 relative z-10 centering-dropdown">
+                            AI Master Recommendation</h3>
+                        <p id="aiMasterRec"
+                            class="text-xl text-white font-medium leading-relaxed relative z-10 centering-dropdown">
+                            Loading deep system analysis...
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bookDetailSection"
+                class="hidden h-full flex-col w-full p-4 md:p-10 overflow-y-auto custom-scrollbar">
+                <button onclick="switchTab('catalog')"
+                    class="flex items-center text-slate-400 hover:text-[#00D4AA] transition mb-8 w-fit group centering-dropdown">
+                    <i
+                        class="fa-solid fa-arrow-left mr-2 transform group-hover:-translate-x-1 transition centering-dropdown"></i>
+                    Back to Catalog
+                </button>
+
+                <div class="flex flex-col md:flex-row gap-10 max-w-5xl mx-auto w-full centering-dropdown">
+                    <div class="w-full md:w-1/3 shrink-0 centering-dropdown">
+                        <div
+                            class="rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-slate-700/50 relative bg-[#0D1117] aspect-[2/3] flex items-center justify-center mx-auto max-w-[250px] md:max-w-none centering-dropdown">
+                            <img id="detailCover" src="" alt="Book Cover"
+                                class="w-full h-full object-cover centering-dropdown">
+                        </div>
+                    </div>
+                    <div class="flex-grow flex flex-col centering-dropdown">
+                        <div class="flex flex-wrap items-center gap-3 mb-4 centering-dropdown">
+                            <span id="detailStatus"
+                                class="bg-[#00D4AA]/10 text-[#00D4AA] px-3 py-1 rounded-full text-xs font-bold border border-[#00D4AA]/30 centering-dropdown">Available</span>
+                            <span id="detailCategory"
+                                class="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30 centering-dropdown">Category</span>
+                        </div>
+                        <h1 id="detailTitle"
+                            class="text-3xl md:text-5xl font-extrabold text-white mb-2 centering-dropdown">Book Title
+                        </h1>
+                        <p id="detailAuthor" class="text-lg text-[#00D4AA] mb-8 font-medium centering-dropdown">By
+                            Author Name</p>
+
+                        <div
+                            class="grid grid-cols-2 gap-4 mb-8 bg-slate-900/50 p-6 rounded-2xl border border-slate-800 shadow-inner centering-dropdown">
+                            <div class="centering-dropdown">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 centering-dropdown">ISBN
+                                    Number</p>
+                                <p id="detailIsbn" class="text-white font-mono centering-dropdown">123-456-789</p>
+                            </div>
+                            <div class="centering-dropdown">
+                                <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 centering-dropdown">
+                                    Library Stock</p>
+                                <p class="text-white centering-dropdown"><span id="detailAvailable"
+                                        class="font-bold text-[#00D4AA] text-xl centering-dropdown">0</span> / <span
+                                        id="detailTotal" class="text-slate-400 centering-dropdown">0</span> Copies</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-10 flex-grow centering-dropdown">
+                            <h3
+                                class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-3 flex items-center centering-dropdown">
+                                <i class="fa-solid fa-circle-info mr-2 text-[#00D4AA] centering-dropdown"></i> About
+                                this book
+                            </h3>
+                            <p id="detailDescription" class="text-slate-400 leading-relaxed centering-dropdown">No
+                                detailed description is available for this title at the moment. Please check back later!
+                            </p>
+                        </div>
+
+                        <div class="mt-auto pt-6 border-t border-slate-800/80 centering-dropdown">
+                            <button id="borrowBookBtn" onclick="borrowCurrentBook()"
+                                class="bg-[#00D4AA] hover:bg-[#00D4AA]/80 text-[#0D1117] px-8 py-3.5 rounded-full font-bold transition shadow-[0_0_20px_rgba(0,212,170,0.3)] hover:shadow-[0_0_30px_rgba(0,212,170,0.5)] transform hover:-translate-y-0.5 w-full md:w-auto flex items-center justify-center centering-dropdown">
+                                <i class="fa-solid fa-hand-holding-box mr-2 centering-dropdown"></i> Borrow Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div onclick="toggleChat()"
+        class="fixed bottom-6 right-6 sm:bottom-10 sm:right-10 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-tr from-[#6C63FF] to-[#00D4AA] rounded-full flex items-center justify-center cursor-pointer shadow-[0_0_30px_rgba(0,212,170,0.4)] hover:scale-110 transition-transform duration-300 z-[9998] centering-dropdown">
+        <i class="fa-solid fa-robot text-2xl sm:text-3xl text-white centering-dropdown"></i>
+    </div>
+
+    <div id="aiChatWindow"
+        class="fixed bottom-24 left-4 right-4 sm:left-auto sm:right-10 sm:w-96 h-[60vh] sm:h-[500px] bg-[#0D1117]/95 backdrop-blur-2xl rounded-2xl border border-slate-700 shadow-2xl hidden z-[9998] overflow-hidden centering-dropdown">
+        <div class="flex flex-col h-full w-full centering-dropdown">
+            <div
+                class="shrink-0 p-4 border-b border-slate-700 flex justify-between items-center bg-white/5 rounded-t-2xl centering-dropdown">
+                <h3 class="text-lg font-bold text-white flex items-center gap-3 centering-dropdown">
+                    <div
+                        class="w-8 h-8 rounded-full bg-[#00D4AA]/20 flex items-center justify-center border border-[#00D4AA]/50 centering-dropdown">
+                        <i class="fa-solid fa-robot text-[#00D4AA] text-sm centering-dropdown"></i>
+                    </div>
+                    AI Librarian
+                </h3>
+                <button onclick="toggleChat()" title="Close chat"
+                    class="text-slate-400 hover:text-white transition centering-dropdown"><i
+                        class="fa-solid fa-xmark text-xl centering-dropdown"></i></button>
+            </div>
+
+            <div id="chatHistory"
+                class="flex-grow min-h-0 p-5 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 centering-dropdown">
+                <div
+                    class="bg-slate-800/80 text-slate-200 p-3.5 rounded-2xl rounded-tl-sm text-sm w-[85%] border border-slate-700 shadow-sm leading-relaxed centering-dropdown">
+                    Hello there! Ask me about books, categories, or the status of your borrowed books. I’m here to help!
+                </div>
+            </div>
+
+            <div class="shrink-0 p-4 border-t border-slate-700 flex gap-3 bg-[#0D1117] centering-dropdown">
+                <input type="text" id="chatInput" placeholder="Ask about 'Java books'..."
+                    class="flex-grow bg-[#151B23] border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#00D4AA] transition centering-dropdown">
+                <button onclick="sendMessage()" title="Send"
+                    class="bg-gradient-to-r from-[#6C63FF] to-[#00D4AA] shrink-0 w-11 h-11 rounded-xl text-white flex items-center justify-center transition hover:scale-105 shadow-lg centering-dropdown">
+                    <i class="fa-solid fa-paper-plane centering-dropdown"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="addBookModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[9999] p-4 centering-dropdown">
+        <div
+            class="bg-[#0D1117] p-8 rounded-2xl w-full max-w-xl border border-slate-700 shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 centering-dropdown">
+            <h2 id="modalTitle"
+                class="text-2xl font-bold text-white mb-6 border-b border-slate-800 pb-3 centering-dropdown">Add New
+                Book</h2>
+            <form id="addBookForm" class="space-y-4.5 centering-dropdown" onsubmit="submitNewBook(event)">
+                <input type="hidden" id="editBookId" value="">
+                <div class="centering-dropdown"><label for="bookTitle"
+                        class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">Book
+                        Title</label><input type="text" id="bookTitle" name="bookTitle" required
+                        class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] centering-dropdown">
+                </div>
+                <div class="centering-dropdown"><label for="bookAuthor"
+                        class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">Author</label><input
+                        type="text" id="bookAuthor" name="bookAuthor" required
+                        class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] centering-dropdown">
+                </div>
+                <div class="centering-dropdown"><label for="bookCoverUrl"
+                        class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">Cover Image
+                        URL</label><input type="url" id="bookCoverUrl" name="bookCoverUrl"
+                        class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] centering-dropdown">
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 centering-dropdown">
+                    <div class="w-full sm:w-1/2 centering-dropdown"><label for="bookIsbn"
+                            class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">ISBN</label><input
+                            type="text" id="bookIsbn" name="bookIsbn" required
+                            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] centering-dropdown">
+                    </div>
+                    <div class="w-full sm:w-1/2 centering-dropdown"><label for="bookCopies"
+                            class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">Copies</label><input
+                            type="number" id="bookCopies" name="bookCopies" min="1" value="1" required
+                            class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] centering-dropdown">
+                    </div>
+                </div>
+                <div class="centering-dropdown">
+                    <label for="bookCategory"
+                        class="block text-sm font-medium text-slate-300 mb-1.5 centering-dropdown">Category</label>
+                    <select id="bookCategory" name="bookCategory"
+                        class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 focus:outline-none focus:border-[#00D4AA] appearance-none centering-dropdown">
+                        <option value="1">Computer Science</option>
+                        <option value="2">DevOps & Cloud</option>
+                        <option value="3">Operations Research</option>
+                        <option value="4">Data Science</option>
+                        <option value="5">Fiction & Manga</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-800 centering-dropdown">
+                    <button type="button" onclick="closeAddBookModal()"
+                        class="px-6 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition font-medium centering-dropdown">Cancel</button>
+                    <button type="submit"
+                        class="px-6 py-2.5 bg-gradient-to-r from-[#6C63FF] to-[#00D4AA] text-white rounded-xl font-bold shadow-lg hover:opacity-90 transition centering-dropdown">Save
+                        Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[10000] p-4 centering-dropdown">
+        <div
+            class="bg-[#0D1117] p-8 rounded-3xl w-full max-w-sm border border-red-500/30 shadow-[0_0_40px_rgba(239,68,68,0.15)] text-center relative mx-4 centering-dropdown">
+            <div
+                class="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-5 border border-red-500/30 centering-dropdown">
+                <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 centering-dropdown"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-3 centering-dropdown">Delete Book?</h3>
+            <p class="text-slate-400 text-sm mb-8 centering-dropdown">This action cannot be undone.</p>
+            <input type="hidden" id="deleteBookId" value="">
+            <div class="flex flex-col sm:flex-row gap-3 centering-dropdown">
+                <button onclick="closeDeleteModal()"
+                    class="w-full sm:w-1/2 px-6 py-3 text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-xl transition font-medium centering-dropdown">Cancel</button>
+                <button onclick="confirmDeleteBook()"
+                    class="w-full sm:w-1/2 px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition centering-dropdown">Yes,
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="userModal"
+        class="fixed inset-0 bg-[#0D1117]/90 backdrop-blur-sm z-[9999] hidden flex-col items-center justify-center p-4 opacity-0 transition-opacity duration-300 centering-dropdown">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)] transform scale-95 transition-transform duration-300 mx-4 centering-dropdown"
+            id="userModalContent">
+            <div class="relative h-32 bg-gradient-to-r from-[#00D4AA]/20 to-purple-500/20 centering-dropdown">
+                <button onclick="closeUserModal()" title="close"
+                    class="absolute top-4 right-4 text-white/50 hover:text-white bg-black/20 hover:bg-black/40 rounded-full w-8 h-8 flex items-center justify-center transition centering-dropdown">
+                    <i class="fa-solid fa-times centering-dropdown"></i>
+                </button>
+            </div>
+            <div class="px-8 pb-8 relative centering-dropdown">
+                <div id="modalAvatar"
+                    class="w-24 h-24 rounded-full border-4 border-slate-900 absolute -top-12 flex items-center justify-center text-4xl font-bold shadow-lg bg-[#00D4AA]/20 text-[#00D4AA] centering-dropdown">
+                    X</div>
+                <div class="flex justify-end pt-4 mb-4 gap-2 centering-dropdown">
+                    <span id="modalRole"
+                        class="px-3 py-1 rounded-full text-xs font-bold border centering-dropdown">Role</span>
+                    <span id="modalStatus"
+                        class="px-3 py-1 rounded-full text-xs font-bold border centering-dropdown">Status</span>
+                </div>
+                <h2 id="modalName" class="text-2xl font-extrabold text-white capitalize centering-dropdown">User Name
+                </h2>
+                <p id="modalEmail" class="text-slate-400 mb-1 centering-dropdown">email@example.com</p>
+                <p class="text-[#00D4AA] font-mono text-sm mb-6 centering-dropdown" id="modalId">ID-123</p>
+                <div
+                    class="grid grid-cols-2 gap-4 bg-[#0D1117] rounded-xl p-4 border border-slate-800 mb-6 shadow-inner centering-dropdown">
+                    <div class="centering-dropdown">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 centering-dropdown">Department
+                        </p>
+                        <p id="modalDept" class="text-white font-medium centering-dropdown">Computer Science</p>
+                    </div>
+                    <div class="centering-dropdown">
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 centering-dropdown">Active Loans
+                        </p>
+                        <p id="modalLoans" class="text-white font-bold text-xl centering-dropdown">0</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 text-sm centering-dropdown">
+                    <button
+                        class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-medium transition border border-slate-700 flex items-center justify-center gap-2 centering-dropdown"
+                        onclick="showToast('Password reset email sent!', 'success')">
+                        <i class="fa-solid fa-key text-slate-400 centering-dropdown"></i> Reset Password
+                    </button>
+                    <button
+                        class="flex-1 bg-[#00D4AA]/10 hover:bg-[#00D4AA]/20 text-[#00D4AA] border border-[#00D4AA]/30 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2 centering-dropdown"
+                        onclick="showToast('Message system coming soon!', 'success')">
+                        <i class="fa-solid fa-envelope centering-dropdown"></i> Message
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

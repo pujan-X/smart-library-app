@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Smart Library AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Manrope', 'sans-serif'] } } } }
+    </script>
+</head>
+<body class="bg-[#0D1117] font-sans text-slate-200 min-h-screen flex items-center justify-center relative overflow-hidden p-4">
+    
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-[#6C63FF]/20 rounded-full blur-[120px] -z-10"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] bg-[#00D4AA]/10 rounded-full blur-[100px] -z-10"></div>
+
+    <div id="toastContainer" class="fixed top-5 right-5 z-[10000] flex flex-col gap-3 pointer-events-none"></div>
+
+    <div class="w-full max-w-md p-6 md:p-8 bg-[#0D1117]/80 backdrop-blur-2xl rounded-3xl border border-slate-700/50 shadow-2xl relative">
+        
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#00D4AA]/10 border border-[#00D4AA]/30 mb-3 shadow-[0_0_15px_rgba(0,212,170,0.2)]">
+                <i class="fa-solid fa-user-plus text-2xl text-[#00D4AA]"></i>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-wide">Create Account</h1>
+            <p class="text-slate-400 mt-1 text-sm">Join the Smart Library AI platform.</p>
+        </div>
+
+        <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3">
+            
+            <div>
+                <label for="regRole" class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">I am a...</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
+                        <i class="fa-solid fa-user-tag text-sm"></i>
+                    </div>
+                    <select id="regRole" class="w-full bg-[#151B23] border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner appearance-none cursor-pointer text-sm">
+                        <option value="ROLE_STUDENT">Student</option>
+                        <option value="ROLE_TEACHER">Teacher</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500"><i class="fa-solid fa-id-card text-sm"></i></div>
+                    <input type="text" id="regFullName" required placeholder="Alex Chen" class="w-full bg-[#151B23] border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">College Email</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500"><i class="fa-solid fa-envelope text-sm"></i></div>
+                    <input type="email" id="regEmail" required placeholder="alex@college.edu" class="w-full bg-[#151B23] border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Username</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500"><i class="fa-solid fa-user text-sm"></i></div>
+                    <input type="text" id="regUsername" required placeholder="alex_chen" class="w-full bg-[#151B23] border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner text-sm">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500"><i class="fa-solid fa-lock text-sm"></i></div>
+                    <input type="password" id="regPassword" required placeholder="••••••••" class="w-full bg-[#151B23] border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition shadow-inner text-sm">
+                </div>
+            </div>
+
+            <button type="submit" id="regSubmitBtn" class="w-full py-3 mt-4 bg-gradient-to-r from-[#00D4AA] to-blue-600 text-white font-bold rounded-xl shadow-lg hover:opacity-90 hover:scale-[1.02] transition-all text-sm">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-xs text-slate-400 mt-6">
+            Already have an account? <a href="/index.html" class="text-[#6C63FF] font-bold hover:underline">Log in</a>
+        </p>
+    </div>
+
+    <script src="app.js?v=4"></script>
+</body>
+</html>
