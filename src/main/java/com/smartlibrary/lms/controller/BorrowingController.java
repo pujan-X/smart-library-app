@@ -151,15 +151,13 @@ public class BorrowingController {
         User currentUser = userOpt.get();
         List<Map<String, Object>> safeLoans = new java.util.ArrayList<>();
         
-        // Use a standard loop so we can catch and isolate errors per-book!
         for (Borrowing b : borrowingRepository.findAll()) {
             try {
-                // SUPER SAFE NULL CHECK: Ensure user exists and matches
+
                 if (b.getUser() != null && b.getUser().getId().equals(currentUser.getId())) {
                     Map<String, Object> map = new java.util.HashMap<>();
                     map.put("id", b.getId());
                     
-                    // Safe Book Checks
                     if (b.getBook() != null) {
                         map.put("bookTitle", b.getBook().getTitle());
                         map.put("bookAuthor", b.getBook().getAuthor());
@@ -168,11 +166,9 @@ public class BorrowingController {
                         map.put("bookAuthor", "Unknown Author");
                     }
                     
-                    // Safe Date Checks
                     map.put("issueDate", b.getIssueDate() != null ? b.getIssueDate().toString() : "Pending");
                     map.put("dueDate", b.getDueDate() != null ? b.getDueDate().toString() : "Pending");
                     
-                    // Safe Status Calculation
                     String status = "ACTIVE";
                     long daysOverdue = 0;
                     
@@ -192,12 +188,11 @@ public class BorrowingController {
                     
                     map.put("status", status);
                     map.put("daysOverdue", daysOverdue);
-                    map.put("fineAmount", daysOverdue * 12); // ₹12 per day
+                    map.put("fineAmount", daysOverdue * 12);
                     
                     safeLoans.add(map);
                 }
             } catch (Exception e) {
-                // If one record is corrupted, log it but DON'T crash the page!
                 System.out.println("Skipped corrupted loan record: " + e.getMessage());
             }
         }
