@@ -32,7 +32,7 @@ function showToast(message, type = 'success') {
 
 
 async function handleLogin() {
-    event.preventDefault(); // <--- THIS STOPS THE PAGE FROM REFRESHING!
+    event.preventDefault();
     const usernameInput = document.getElementById('username').value;
     const passwordInput = document.getElementById('password').value;
 
@@ -67,7 +67,7 @@ async function handleLogin() {
 async function handleRegister(event) {
     event.preventDefault();
 
-    // Grab the selected role
+   
     const role = document.getElementById('regRole').value;
     const fullName = document.getElementById('regFullName').value;
     const email = document.getElementById('regEmail').value;
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (usernameEl) usernameEl.textContent = userData.username || 'User';
 
                 const badgeEl = document.getElementById('userRoleBadge');
-                let isAdmin = false; // Flag for Smart Routing
+                let isAdmin = false;
 
                 if (badgeEl) {
                     const displayRole = userData.role.replace('ROLE_', '');
@@ -193,24 +193,20 @@ function switchTab(tabName) {
         return;
     }
 
-    // 1. Run Security Check
+   
     enforceSidebarSecurity();
 
-    // 2. Save the original tab name so the Sidebar highlight knows which button to light up!
     let tabToHighlight = tabName;
 
-    // 3. Smart Routing: Admin vs Student Dashboard
     if (tabName === 'dashboard') {
         const roleBadge = document.getElementById('userRoleBadge');
         if (roleBadge && !roleBadge.textContent.includes("ADMIN")) {
-            tabName = 'studentDashboard'; // Secretly swap the destination to the Student view
+            tabName = 'studentDashboard';
         }
     }
 
-    // 4. Highlight the active sidebar button
     highlightActiveNavButton(tabToHighlight);
 
-    // 5. Hide all sections
     const sections = ['dashboard', 'catalog', 'manageBooks', 'users', 'issue', 'aiInsights', 'bookDetail', 'myLoans', 'studentDashboard'];
     sections.forEach(sec => {
         const el = document.getElementById(sec + 'Section');
@@ -220,19 +216,16 @@ function switchTab(tabName) {
         }
     });
 
-    // Auto-close mobile menu if it is open
     const sidebar = document.getElementById('sidebar');
     if (sidebar && !sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
         toggleMobileMenu();
     }
-    // 6. Show the requested section
     const targetEl = document.getElementById(tabName + 'Section');
     if (targetEl) {
         targetEl.classList.remove('hidden');
         targetEl.classList.add('flex');
     }
 
-    // 7. Load Data specific to that tab
     if (tabName === 'dashboard') {
         loadDashboardStats(token);
     } else if (tabName === 'studentDashboard') {
@@ -577,7 +570,7 @@ async function returnBook(borrowingId) {
 
         if (response.ok) {
             showToast("Book returned successfully!", "success");
-            loadMyBorrowings(token); // Phase 1 Re-hook: refresh dynamic list safely
+            loadMyBorrowings(token); 
         } else {
             const errorMsg = await response.text();
             showToast(errorMsg || "Failed to return book.", "error");
@@ -621,7 +614,6 @@ async function sendMessage() {
     `;
     chatHistory.scrollTop = chatHistory.scrollHeight;
 
-    // Auto-scroll to the newest message
     const chatBox = document.getElementById('chatHistory');
     chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -1081,7 +1073,6 @@ async function borrowCurrentBook() {
                 switchTab('catalog');
             }, 1500);
 
-            // Trigger Admin Notification
             const username = document.getElementById('navUsername').textContent;
             const bookTitle = document.getElementById('detailTitle').textContent;
             triggerAdminNotification(`${username} successfully borrowed '${bookTitle}'.`, 'borrow');
@@ -1628,20 +1619,18 @@ function enforceSidebarSecurity() {
     const navMyLoans = document.getElementById('navMyLoans');
     const navDashboard = document.getElementById('navDashboard');
 
-    // CRITICAL FIX: The Dashboard button must ALWAYS be visible for everyone!
     if (navDashboard) {
         navDashboard.classList.remove('hidden');
         navDashboard.classList.add('flex');
     }
 
     if (isAdmin) {
-        // Admins see management tools, but not personal loans
+
         if (navManageBooks) navManageBooks.classList.remove('hidden');
         if (navUsers) navUsers.classList.remove('hidden');
         if (navIssue) navIssue.classList.remove('hidden');
         if (navMyLoans) navMyLoans.classList.add('hidden');
     } else {
-        // Students & Teachers only see personal loans
         if (navManageBooks) navManageBooks.classList.add('hidden');
         if (navUsers) navUsers.classList.add('hidden');
         if (navIssue) navIssue.classList.add('hidden');
@@ -1664,11 +1653,10 @@ async function loadMyLoans() {
 
         if (response.ok) {
             currentMyLoansList = await response.json();
-            console.log("Successfully loaded loans:", currentMyLoansList); // Helpful for debugging
+            console.log("Successfully loaded loans:", currentMyLoansList); 
             applyLoanFilters();
             updateLoanCounters();
         } else {
-            // STOP FAILING SILENTLY: Show an error if the backend crashes
             console.error("Failed to load personal loans:", response.status);
             showToast("Backend Error: Could not load your loans.", "error");
         }
@@ -1681,13 +1669,11 @@ async function loadMyLoans() {
 function setLoanFilter(status, btnElement) {
     currentLoanFilter = status;
 
-    // Reset all buttons to unselected gray
     const parent = btnElement.parentElement;
     Array.from(parent.children).forEach(btn => {
         btn.className = "flex items-center gap-2 bg-[#0D1117] border border-slate-800 hover:border-slate-600 px-5 py-2.5 rounded-xl text-slate-400 hover:text-white text-sm font-bold transition";
     });
 
-    // Highlight the clicked button
     btnElement.className = "flex items-center gap-2 bg-slate-800 border border-slate-600 px-5 py-2.5 rounded-xl text-white text-sm font-bold transition";
 
     applyLoanFilters();
@@ -1709,7 +1695,6 @@ function applyLoanFilters() {
     }
 
     filteredLoans.forEach(loan => {
-        // Build card based on status
         let cardHtml = '';
 
         if (loan.status === 'OVERDUE') {
@@ -1753,7 +1738,6 @@ function applyLoanFilters() {
                     <button onclick='renewLoan(${loan.id}, "${loan.bookTitle}")' class="bg-[#00D4AA]/10 hover:bg-[#00D4AA] text-[#00D4AA] hover:text-[#0D1117] border border-[#00D4AA]/30 px-6 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2"><i class="fa-solid fa-rotate-right"></i> Renew Loan</button>                </div>
             </div>`;
         } else {
-            // Returned Status
             cardHtml = `
             <div class="bg-[#0D1117] border border-slate-800 rounded-2xl p-6 relative overflow-hidden opacity-70">
                 <div class="flex justify-between items-center">
@@ -1776,10 +1760,8 @@ function updateLoanCounters() {
     document.getElementById('countReturnedLoans').textContent = currentMyLoansList.filter(l => l.status === 'RETURNED').length;
 }
 
-// Button Actions!
 function processFinePayment(loanId, amount) {
     showToast(`Redirecting to secure payment gateway for ₹${amount}.00...`, 'success');
-    // In the future, this would open a Stripe/Razorpay modal
 }
 
 // ==========================================
@@ -1787,24 +1769,18 @@ function processFinePayment(loanId, amount) {
 // ==========================================
 
 function renewLoan(loanId, bookTitle) {
-    // 1. Show the success message to the student (Now with the book title!)
     showToast(`Renewal requested for '${bookTitle}'. Awaiting admin approval.`, 'success');
     
-    // 2. TRIGGER THE ADMIN NOTIFICATION!
     const userElement = document.getElementById('navUsername');
     const username = userElement ? userElement.textContent : "A student";
     
-    // Use the bookTitle instead of the Loan ID!
     triggerAdminNotification(`${username} requested a renewal for '${bookTitle}'.`, 'return');
 }
 
-// NOTE: If you also created a specific "Return Book" button for the student, 
-// you can add this function and trigger it from your HTML:
+
 function requestReturn(loanId, bookTitle) {
-    // 1. Show the success message to the student
     showToast(`Return requested. Please bring the book to the Operations Desk.`, 'success');
 
-    // 2. TRIGGER THE ADMIN NOTIFICATION!
     const userElement = document.getElementById('navUsername');
     const username = userElement ? userElement.textContent : "A student";
 
@@ -1815,37 +1791,31 @@ function requestReturn(loanId, bookTitle) {
 // SIDEBAR HIGHLIGHT LOGIC (Custom for your UI)
 // ==========================================
 function highlightActiveNavButton(activeTab) {
-    // 1. Map the tab names to your EXACT HTML IDs
     const navMap = {
         'dashboard': 'navDashboard',
         'catalog': 'navCatalog',
         'myLoans': 'navMyLoans',
         'manageBooks': 'navManageBooks',
         'users': 'navUsers',
-        'issue': 'navIssueReturn', // Matches your custom ID perfectly!
+        'issue': 'navIssueReturn',
         'aiInsights': 'navAiInsights'
     };
 
-    // 2. Your beautiful glowing active classes
-    // 2. Your beautiful glowing active classes (Removed the hard 'border' class!)
+    
     const activeClasses = ['active-tab', 'bg-[#00D4AA]/10', 'text-[#00D4AA]', 'border-[#00D4AA]/30', 'hover:bg-[#00D4AA]/20', 'shadow-[0_0_15px_rgba(0,212,170,0.1)]'];
-    // 3. Your standard inactive classes
     const inactiveClasses = ['text-slate-400', 'hover:text-white', 'hover:bg-slate-800/50'];
 
-    // 4. Reset ALL buttons to their standard, inactive state
     Object.values(navMap).forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
             btn.classList.remove(...activeClasses);
             btn.classList.add(...inactiveClasses);
 
-            // Remove green from the icon specifically
             const icon = btn.querySelector('i');
             if (icon) icon.classList.remove('text-[#00D4AA]');
         }
     });
 
-    // 5. Apply the glowing active styles to the newly clicked button
     const activeBtnId = navMap[activeTab];
     if (activeBtnId) {
         const activeBtn = document.getElementById(activeBtnId);
@@ -1853,7 +1823,6 @@ function highlightActiveNavButton(activeTab) {
             activeBtn.classList.remove(...inactiveClasses);
             activeBtn.classList.add(...activeClasses);
 
-            // Add green to the icon specifically
             const icon = activeBtn.querySelector('i');
             if (icon) icon.classList.add('text-[#00D4AA]');
         }
@@ -1882,7 +1851,6 @@ async function loadStudentDashboard() {
         if (response.ok) {
             const myLoans = await response.json();
 
-            // Calculate Stats
             const activeLoans = myLoans.filter(l => l.status === 'ACTIVE').length;
             const overdueLoans = myLoans.filter(l => l.status === 'OVERDUE').length;
             const returnedLoans = myLoans.filter(l => l.status === 'RETURNED').length;
@@ -1892,14 +1860,12 @@ async function loadStudentDashboard() {
                 totalFines += l.fineAmount;
             });
 
-            // Update UI
             document.getElementById('studentActiveCountText').textContent = `${activeLoans} active loans`;
             document.getElementById('studentStatActive').textContent = activeLoans;
             document.getElementById('studentStatOverdue').textContent = overdueLoans;
             document.getElementById('studentStatReturned').textContent = returnedLoans;
             document.getElementById('studentStatFines').textContent = `₹${totalFines}`;
 
-            // Make overdue count turn red if > 0
             if (overdueLoans > 0) {
                 document.getElementById('studentStatOverdue').classList.add('text-red-500');
             }
@@ -1913,30 +1879,26 @@ async function loadStudentDashboard() {
 // ADMIN NOTIFICATION SYSTEM
 // ==========================================
 
-// Get from memory or start empty
 function getAdminNotifications() {
     const stored = localStorage.getItem('libraryAdminNotifs');
     return stored ? JSON.parse(stored) : [];
 }
 
-// Save to memory
 function saveAdminNotifications(notifs) {
     localStorage.setItem('libraryAdminNotifs', JSON.stringify(notifs));
     renderNotifications();
 }
 
-// Trigger a new notification (We will call this when someone borrows/returns)
 function triggerAdminNotification(text, type) {
     let notifs = getAdminNotifications();
-    notifs.unshift({ // Add to the top of the list
+    notifs.unshift({ 
         id: Date.now(),
         text: text,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: type, // 'borrow' or 'return'
+        type: type, 
         read: false
     });
 
-    // Keep only the latest 20 notifications to save memory
     if (notifs.length > 20) notifs.pop();
 
     saveAdminNotifications(notifs);
@@ -1958,7 +1920,6 @@ function renderNotifications() {
     let notifs = getAdminNotifications();
     const unreadCount = notifs.filter(n => !n.read).length;
 
-    // Toggle the red dot
     if (unreadCount > 0) badge.classList.remove('hidden');
     else badge.classList.add('hidden');
 
@@ -1967,7 +1928,6 @@ function renderNotifications() {
         return;
     }
 
-    // Build the HTML for the list
     list.innerHTML = notifs.map(n => {
         let iconHtml = n.type === 'borrow'
             ? '<div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/30"><i class="fa-solid fa-hand-holding-box text-xs"></i></div>'
@@ -1998,7 +1958,6 @@ function clearNotifications() {
     saveAdminNotifications(notifs);
 }
 
-// Call render once on load just to set the red badge correctly
 document.addEventListener('DOMContentLoaded', renderNotifications);
 
 // ==========================================
@@ -2008,13 +1967,10 @@ function toggleMobileMenu() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('mobileSidebarOverlay');
     
-    // Toggle the slide-in translation
     sidebar.classList.toggle('-translate-x-full');
     
-    // Toggle the dark backdrop overlay
     if (overlay.classList.contains('hidden')) {
         overlay.classList.remove('hidden');
-        // Tiny delay for smooth fade-in
         setTimeout(() => overlay.classList.remove('opacity-0'), 10);
     } else {
         overlay.classList.add('opacity-0');
