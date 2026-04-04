@@ -40,7 +40,7 @@ public class UserController {
         String role = authentication.getAuthorities().stream()
                 .findFirst()
                 .map(auth -> auth.getAuthority().replace("ROLE_", ""))
-                .orElse("STUDENT"); // Defaults to STUDENT if no role is found
+                .orElse("STUDENT"); 
 
         userData.put("role", role);
 
