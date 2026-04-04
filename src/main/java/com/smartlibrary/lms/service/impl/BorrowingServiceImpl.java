@@ -47,7 +47,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowing.setUser(user);
         borrowing.setBook(book);
         borrowing.setIssueDate(LocalDate.now());
-        borrowing.setDueDate(LocalDate.now().plusDays(14)); // Standard 14-day borrowing period
+        borrowing.setDueDate(LocalDate.now().plusDays(14)); 
         borrowing.setStatus(Borrowing.BorrowingStatus.ISSUED);
 
         return borrowingRepository.save(borrowing);
