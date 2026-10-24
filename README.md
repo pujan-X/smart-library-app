@@ -39,7 +39,7 @@ The application is fully containerized and deployed in the cloud, utilizing a se
 * Render (Cloud Deployment)
 
 ## 🚀 Live Demo
-**[Click here to view the live application!](https://nexus-ai-lms.onrender.com)** *(Note: As this is hosted on a free cloud tier, the server may take 50-60 seconds to wake up upon initial load.)*
+**[Click here to view the live application!](https://nexus-ai-lms-70u1.onrender.com)** *(Note: As this is hosted on a free cloud tier, the server may take 50-60 seconds to wake up upon initial load.)*
 
 ## 💻 Local Development Setup
 
